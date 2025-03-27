@@ -1,0 +1,37 @@
+name: Build APK with Buildozer
+
+on:
+  push:
+    branches:
+      - main  # Roda sempre que houver mudanças na branch principal
+  workflow_dispatch:  # Permite rodar manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar repositório
+        uses: actions/checkout@v3
+
+      - name: 🔧 Configurar ambiente Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: 🛠️ Instalar dependências do Buildozer
+        run: |
+          sudo apt update
+          sudo apt install -y ffmpeg libglu1-mesa
+          pip install --upgrade pip
+          pip install buildozer cython virtualenv
+
+      - name: 📦 Criar APK com Buildozer
+        run: |
+          buildozer android debug
+
+      - name: 📤 Enviar APK como artefato
+        uses: actions/upload-artifact@v3
+        with:
+          name: navegador.apk
+          path: bin/*.apk
