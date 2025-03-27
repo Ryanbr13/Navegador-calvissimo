@@ -1,37 +1,52 @@
-name: Build APK with Buildozer
+name: Build APK
 
 on:
   push:
     branches:
-      - main  # Roda sempre que houver mudanças na branch principal
-  workflow_dispatch:  # Permite rodar manualmente
+      - main  # Garante que o workflow será executado quando você enviar alterações para o branch 'main'
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Usa o Ubuntu mais recente como sistema operacional
 
     steps:
-      - name: 📥 Clonar repositório
-        uses: actions/checkout@v3
+    # Passo 1: Checar o código
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: 🔧 Configurar ambiente Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
+    # Passo 2: Configurar o Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'  # Define a versão do Python para 3.8
 
-      - name: 🛠️ Instalar dependências do Buildozer
-        run: |
-          sudo apt update
-          sudo apt install -y ffmpeg libglu1-mesa
-          pip install --upgrade pip
-          pip install buildozer cython virtualenv
+    # Passo 3: Instalar dependências
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pip python3-dev build-essential libssl-dev libffi-dev
+        pip install --upgrade pip
+        pip install buildozer
 
-      - name: 📦 Criar APK com Buildozer
-        run: |
-          buildozer android debug
+    # Passo 4: Instalar dependências do Android
+    - name: Install Android dependencies
+      run: |
+        sudo apt-get install -y openjdk-8-jdk
+        sudo apt-get install -y zip
+        sudo apt-get install -y zlib1g-dev
+        sudo apt-get install -y libncurses5 libstdc++6 lib32z1 lib32ncurses5 lib32bz2-1.0
 
-      - name: 📤 Enviar APK como artefato
-        uses: actions/upload-artifact@v2
-        with:
-          name: navegador.apk
-          path: bin/*.apk
+    # Passo 5: Configurar o Buildozer
+    - name: Build APK
+      run: |
+        buildozer init  # Inicializa o arquivo buildozer.spec se ainda não existir
+        buildozer android debug  # Cria o APK com o Buildozer
+      env:
+        HOME: /home/runner
+
+    # Passo 6: Faz o upload do APK como artefato
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: MyApp-APK
+        path: bin/*.apk
