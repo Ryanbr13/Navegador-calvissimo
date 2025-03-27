@@ -31,7 +31,7 @@ jobs:
           buildozer android debug
 
       - name: 📤 Enviar APK como artefato
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: navegador.apk
           path: bin/*.apk
